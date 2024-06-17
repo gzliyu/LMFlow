@@ -24,11 +24,11 @@ from lmflow.pipeline.auto_pipeline import AutoPipeline
 from lmflow.models.auto_model import AutoModel
 from lmflow.args import ModelArguments, DatasetArguments, AutoArguments
 
-from lmflow.models.hf_decoder_model import *
 from transformers import AutoModelForCausalLM
-from lmflow.models.modeling_topkllama import TopKLlamaForCausalLM
 from lmflow.pipeline.evaluator import *
 import multiprocessing
+
+from lmflow.utils_evaluate import TinyLlamaDecoderModel
 
 if __name__ == "__main__":
     pipeline_name = "evaluator"
@@ -43,14 +43,22 @@ if __name__ == "__main__":
     if data_args.block_size:
         model_args.model_max_length = data_args.block_size
 
-
-    model = AutoModel.get_model(
+    print(model_args.model_max_length)
+    model = TinyLlamaDecoderModel(
         model_args, 
         tune_strategy='none', 
         ds_config=ds_config, 
+        device="cuda",
         use_accelerator=pipeline_args.use_accelerator_for_evaluator
     )
-
+    # model = AutoModel.get_model(
+    #     model_args, 
+    #     tune_strategy='none', 
+    #     ds_config=ds_config, 
+    #     use_accelerator=pipeline_args.use_accelerator_for_evaluator
+    # )
+    print(model.get_backend_model())
+    print(model.get_max_length())
     dataset = Dataset(data_args)
 
     evaluator = AutoPipeline.get_pipeline(
@@ -62,6 +70,5 @@ if __name__ == "__main__":
     evaluator.evaluate(
         model=model, 
         dataset=dataset, 
-        metric=pipeline_args.metric
+        metric=pipeline_args.metric,
     )
-    torch.save(model.get_attn_map(), "attn_map.pt")
