@@ -324,10 +324,11 @@ class Evaluator(BasePipeline):
         encodings = model.get_tokenizer()("\n\n".join(texts), return_tensors="pt")
         # Define some constant
         if self.model_args.truncate_to_model_max_length:
-            try:
-                max_length = min(model.get_backend_model().config.n_positions, model.get_max_length())
-            except:
-                max_length = min(1024, model.get_max_length())
+            # try:
+            #     max_length = min(model.get_backend_model().config.n_positions, model.get_max_length())
+            # except:
+            #     max_length = min(1024, model.get_max_length())
+            max_length = model.get_max_length()
         else:
             max_length = self.block_size
         

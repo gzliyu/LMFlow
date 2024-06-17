@@ -7,6 +7,9 @@ from lmflow.models.hf_decoder_model import HFDecoderModel
 from lmflow.models.hf_text_regression_model import HFTextRegressionModel
 from lmflow.models.hf_encoder_decoder_model import HFEncoderDecoderModel
 
+
+
+
 class AutoModel:
 
     @classmethod

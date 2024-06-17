@@ -21,7 +21,7 @@ from transformers import HfArgumentParser
 
 from lmflow.datasets.dataset import Dataset
 from lmflow.pipeline.auto_pipeline import AutoPipeline
-from lmflow.models.modeling_topkllama import LlamaForCausalLM
+from lmflow.models.auto_model import AutoModel
 from lmflow.args import ModelArguments, DatasetArguments, AutoArguments
 
 
@@ -34,8 +34,11 @@ model_args, data_args, pipeline_args = parser.parse_args_into_dataclasses()
 with open (pipeline_args.deepspeed, "r") as f:
     ds_config = json.load(f)
 
-model = LlamaForCausalLM.from_pretrained(
-    model_args.model_name_or_path, 
+model = AutoModel.get_model(
+    model_args, 
+    tune_strategy='none', 
+    ds_config=ds_config, 
+    use_accelerator=pipeline_args.use_accelerator_for_evaluator
 )
 dataset = Dataset(data_args)
 
