@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from trl import DPOTrainer
-from datasets import Dataset, load_dataset
+from datasets import Dataset, load_from_disk
 from peft import LoraConfig
 from transformers import TrainingArguments
 
@@ -36,15 +36,17 @@ def get_paired_dataset(
       "Question: " + <prompt> + "\n\nAnswer: "
     """
     data_path = Path(data_root) / data_dir
-    data_files = [
-        x.absolute().as_posix()
-            for x in data_path.glob("*.json")
-    ]
-    dataset = load_dataset(
-        path=data_root,
-        split="train",
-        data_files=data_files,
-        cache_dir=cache_dir,
+    # data_files = [
+    #     x.absolute().as_posix()
+    #         for x in data_path.glob("*.json")
+    # ]
+    print(data_path)
+    dataset = load_from_disk(
+        data_path
+        # path=data_root,
+        # split="train",
+        # data_files=data_files,
+        # cache_dir=cache_dir,
     )
     original_columns = dataset.column_names
 
@@ -73,22 +75,26 @@ class DPOAligner(BaseAligner):
         self.aligner_args = aligner_args
 
     def _initialize_trainer(self, model, tokenizer):
-        peft_config = LoraConfig(
-            r=self.model_args.lora_r,
-            lora_alpha=self.model_args.lora_alpha,
-            lora_dropout=self.model_args.lora_dropout,
-            target_modules=[
-                "q_proj",
-                "v_proj",
-                "k_proj",
-                "out_proj",
-                "fc_in",
-                "fc_out",
-                "wte",
-            ],
-            bias="none",
-            task_type="CAUSAL_LM",
-        )
+        if self.model_args.use_lora:
+            print("Using LoRA")
+            peft_config = LoraConfig(
+                r=self.model_args.lora_r,
+                lora_alpha=self.model_args.lora_alpha,
+                lora_dropout=self.model_args.lora_dropout,
+                target_modules=[
+                    "q_proj",
+                    "v_proj",
+                    "k_proj",
+                    "out_proj",
+                    "fc_in",
+                    "fc_out",
+                    "wte",
+                ],
+                bias="none",
+                task_type="CAUSAL_LM",
+            )
+        else:
+            peft_config = None
         training_args = TrainingArguments(
             per_device_train_batch_size=self.aligner_args.per_device_train_batch_size,
             per_device_eval_batch_size=self.aligner_args.per_device_eval_batch_size,
