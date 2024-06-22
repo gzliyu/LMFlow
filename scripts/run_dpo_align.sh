@@ -2,10 +2,10 @@
 # Please run this script under ${project_id} in project directory of
 
 # Parses arguments
-CUDA_VISIBLE_DEVICES=0
-model_name_or_path=/home/nlpintern1/liyu/models/TinyLlama-1.1B-Chat-v1.0
-dataset_path=/home/nlpintern1/liyu/dataset/stack-exchange-paired-dummy/data
-output_dir=output_models/test_lora_1e5_dpo
+CUDA_VISIBLE_DEVICES=0,1
+model_name_or_path=/home/nlpintern1/liyu/models/Meta-Llama-3-8B
+dataset_path=/home/nlpintern1/liyu/dataset/GSM8KPair_06-21llama3_0621
+output_dir=output_models/math_dpo
 deepspeed_args="--include localhost:${CUDA_VISIBLE_DEVICES}"
 # specify gpus/single gpu here by 
 # `--include localhost:0,1` or `--include localhost:0`
@@ -45,7 +45,7 @@ deepspeed ${deepspeed_args} \
     --model_name_or_path ${model_name_or_path} \
     --dataset_path ${dataset_path} \
     --output_dir ${output_dir} \
-    --run_name lora_1e5_dpo \
+    --run_name math_dpo \
     --max_steps 200 \
     --learning_rate 1e-5 \
     --use_lora 1 \
